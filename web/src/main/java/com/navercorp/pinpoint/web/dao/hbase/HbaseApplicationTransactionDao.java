@@ -44,8 +44,7 @@ public class HbaseApplicationTransactionDao implements ApplicationTransactionDao
     private JoinTransactionSampler transactionSampler;
 
     @Autowired
-    private
-    HbaseApplicationStatDaoOperations operations;
+    private HbaseApplicationStatDaoOperations operations;
 
     @Override
     public List<AggreJoinTransactionBo> getApplicationStatList(String applicationId, TimeWindow timeWindow) {

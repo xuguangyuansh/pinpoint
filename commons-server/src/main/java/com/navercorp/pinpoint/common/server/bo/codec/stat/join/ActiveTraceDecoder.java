@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 NAVER Corp.
+ * Copyright 2017 NAVER Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.navercorp.pinpoint.common.server.bo.codec.stat.join;
 
-package com.navercorp.pinpoint.rpc.client;
+import com.navercorp.pinpoint.common.server.bo.codec.stat.ApplicationStatDecoder;
+import org.springframework.stereotype.Component;
 
-public class DummyPinpointClientReconnectEventListener implements PinpointClientReconnectEventListener {
+import java.util.List;
 
-    @Override
-    public void reconnectPerformed(PinpointClient client) {
+/**
+ * @author minwoo.jung
+ */
+@Component("joinActiveTraceDecoder")
+public class ActiveTraceDecoder extends ApplicationStatDecoder {
 
+    public ActiveTraceDecoder(List<ActiveTraceCodec> activeTraceCodecList) {
+        super(activeTraceCodecList);
     }
-
 }

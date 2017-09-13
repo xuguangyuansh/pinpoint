@@ -56,9 +56,9 @@
 	    };
 	    this.getPagingSize = function() {
 			return pagingSize;
-		}
+		};
 		function connectWebSocket() {
-			webSocket = new WebSocket("ws://" + location.host + location.pathname + cfg.wsUrl);
+			webSocket = new WebSocket((location.protocol.indexOf("https") === -1 ? "ws://" : "wss://") + location.host + location.pathname + cfg.wsUrl);
 			webSocket.onopen = function(event) {
 				bIsOpenConnection = true;
 				connectTime = lastReceiveTime = Date.now();

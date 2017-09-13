@@ -51,9 +51,9 @@ public class MemoryDao {
 
     public void insert(String id, long timestamp, List<JoinStatBo> joinMemoryBoList, StatType statType) {
         logger.info("[insert] " + new Date(timestamp) + " : ("+ joinMemoryBoList + " )");
-        List<Put> cpuLoadPuts = applicationStatHbaseOperationFactory.createPuts(id, joinMemoryBoList, statType, memorySerializer);
-        if (!cpuLoadPuts.isEmpty()) {
-            List<Put> rejectedPuts = hbaseTemplate2.asyncPut(APPLICATION_STAT_AGGRE, cpuLoadPuts);
+        List<Put> memoryPuts = applicationStatHbaseOperationFactory.createPuts(id, joinMemoryBoList, statType, memorySerializer);
+        if (!memoryPuts.isEmpty()) {
+            List<Put> rejectedPuts = hbaseTemplate2.asyncPut(APPLICATION_STAT_AGGRE, memoryPuts);
             if (CollectionUtils.isNotEmpty(rejectedPuts)) {
                 hbaseTemplate2.put(APPLICATION_STAT_AGGRE, rejectedPuts);
             }

@@ -88,7 +88,7 @@ public class ServletInvocationInterceptor implements AroundInterceptor {
         this.isTraceCookies = resinConfig.isTraceCookies();
         this.cookieSampler = SimpleSamplerFactory.createSampler(isTraceCookies, resinConfig.getCookieSamplingRate());
         this.cookieDumpType = resinConfig.getCookieDumpType();
-        this.proxyHttpHeaderRecorder = new ProxyHttpHeaderRecorder(traceContext);
+        this.proxyHttpHeaderRecorder = new ProxyHttpHeaderRecorder(traceContext.getProfilerConfig().isProxyHttpHeaderEnable());
 
         traceContext.cacheApi(SERVLET_ASYNCHRONOUS_API_TAG);
         traceContext.cacheApi(SERVLET_SYNCHRONOUS_API_TAG);
@@ -336,11 +336,6 @@ public class ServletInvocationInterceptor implements AroundInterceptor {
             @Override
             public String read(String name) {
                 return request.getHeader(name);
-            }
-
-            @Override
-            public void remove(String name) {
-                // TODO
             }
         });
     }

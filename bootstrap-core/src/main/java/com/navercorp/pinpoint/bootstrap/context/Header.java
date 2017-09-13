@@ -16,6 +16,8 @@
 
 package com.navercorp.pinpoint.bootstrap.context;
 
+import com.navercorp.pinpoint.common.util.DelegateEnumeration;
+
 /**
  * @author emeroad
  */
@@ -28,7 +30,13 @@ public enum Header {
     HTTP_FLAGS("Pinpoint-Flags"),
     HTTP_PARENT_APPLICATION_NAME("Pinpoint-pAppName"),
     HTTP_PARENT_APPLICATION_TYPE("Pinpoint-pAppType"),
-    HTTP_HOST("Pinpoint-Host");
+    HTTP_HOST("Pinpoint-Host"),
+    HTTP_PROXY_NGINX("Pinpoint-ProxyNginx"),
+    HTTP_PROXY_APACHE("Pinpoint-ProxyApache"),
+    HTTP_PROXY_APP("Pinpoint-ProxyApp");
+
+    public static final String FILTER_PATTERN_PREFIX = "Pinpoint-";
+    private static final int FILTER_PATTERN_PREFIX_LENGTH = FILTER_PATTERN_PREFIX.length();
 
     private String name;
 
@@ -39,4 +47,21 @@ public enum Header {
     public String toString() {
         return name;
     }
+
+    public static boolean startWithPinpointHeader(final String name) {
+        if (name == null) {
+            return false;
+        }
+        return name.regionMatches(true, 0, FILTER_PATTERN_PREFIX, 0, FILTER_PATTERN_PREFIX_LENGTH);
+    }
+
+    public static DelegateEnumeration.Filter FILTER = new DelegateEnumeration.Filter() {
+        @Override
+        public boolean filter(Object o) {
+            if (o instanceof String) {
+                return startWithPinpointHeader((String) o);
+            }
+            return false;
+        }
+    };
 }

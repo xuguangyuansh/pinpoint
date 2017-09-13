@@ -52,7 +52,7 @@ public abstract class AbstractServerHandleInterceptor implements AroundIntercept
         this.traceContext = traceContext;
         this.methodDescriptor = descriptor;
         this.excludeUrlFilter = excludeFilter;
-        this.proxyHttpHeaderRecorder = new ProxyHttpHeaderRecorder(traceContext);
+        this.proxyHttpHeaderRecorder = new ProxyHttpHeaderRecorder(traceContext.getProfilerConfig().isProxyHttpHeaderEnable());
 
         traceContext.cacheApi(JETTY_SYNC_API_TAG);
     }
@@ -246,11 +246,6 @@ public abstract class AbstractServerHandleInterceptor implements AroundIntercept
             @Override
             public String read(String name) {
                 return request.getHeader(name);
-            }
-
-            @Override
-            public void remove(String name) {
-                // TODO
             }
         });
     }

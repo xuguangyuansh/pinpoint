@@ -27,7 +27,9 @@ public interface ActiveTraceRepository {
 
     ActiveTraceHistogram getActiveTraceHistogram(long timeStamp);
 
-    List<ActiveTraceSnapshot> collect();
+    List<ActiveTraceSnapshot> snapshot();
+
+    List<Long> getThreadIdList();
 
     ActiveTraceHandle register(TraceRoot traceRoot);
 

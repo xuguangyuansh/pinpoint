@@ -42,7 +42,6 @@ import com.navercorp.pinpoint.plugin.tomcat.ServletSyncMethodDescriptor;
 import com.navercorp.pinpoint.plugin.tomcat.TomcatConfig;
 import com.navercorp.pinpoint.plugin.tomcat.TomcatConstants;
 import com.navercorp.pinpoint.plugin.tomcat.TraceAccessor;
-import com.navercorp.pinpoint.plugin.tomcat.TomcatHttpHeaderHolder;
 
 /**
  * @author emeroad
@@ -81,7 +80,7 @@ public class StandardHostValveInvokeInterceptor implements AroundInterceptor {
         }
         this.isTraceRequestParam = tomcatConfig.isTomcatTraceRequestParam();
         this.excludeProfileMethodFilter = tomcatConfig.getTomcatExcludeProfileMethodFilter();
-        this.proxyHttpHeaderRecorder = new ProxyHttpHeaderRecorder(traceContext);
+        this.proxyHttpHeaderRecorder = new ProxyHttpHeaderRecorder(traceContext.getProfilerConfig().isProxyHttpHeaderEnable());
 
         traceContext.cacheApi(SERVLET_ASYNCHRONOUS_API_TAG);
         traceContext.cacheApi(SERVLET_SYNCHRONOUS_API_TAG);
@@ -288,11 +287,6 @@ public class StandardHostValveInvokeInterceptor implements AroundInterceptor {
             @Override
             public String read(String name) {
                 return request.getHeader(name);
-            }
-
-            @Override
-            public void remove(String name) {
-                TomcatHttpHeaderHolder.setHeader(name);
             }
         });
     }

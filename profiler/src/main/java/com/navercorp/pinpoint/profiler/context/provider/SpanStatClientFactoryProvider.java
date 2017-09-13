@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,33 +19,42 @@ package com.navercorp.pinpoint.profiler.context.provider;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.navercorp.pinpoint.bootstrap.config.ProfilerConfig;
-import com.navercorp.pinpoint.rpc.client.PinpointClient;
+import com.navercorp.pinpoint.rpc.client.DefaultPinpointClientFactory;
 import com.navercorp.pinpoint.rpc.client.PinpointClientFactory;
-import com.navercorp.pinpoint.rpc.util.ClientFactoryUtils;
 
 /**
- * @author Woonduk Kang(emeroad)
+ * @author Taejin Koo
  */
-public class PinpointClientProvider implements Provider<PinpointClient> {
+public class SpanStatClientFactoryProvider implements Provider<PinpointClientFactory> {
+
     private final ProfilerConfig profilerConfig;
-    private final Provider<PinpointClientFactory> clientFactory;
 
     @Inject
-    public PinpointClientProvider(ProfilerConfig profilerConfig, Provider<PinpointClientFactory> clientFactory) {
+    public SpanStatClientFactoryProvider(ProfilerConfig profilerConfig) {
         if (profilerConfig == null) {
             throw new NullPointerException("profilerConfig must not be null");
         }
-        if (clientFactory == null) {
-            throw new NullPointerException("clientFactory must not be null");
-        }
+
         this.profilerConfig = profilerConfig;
-        this.clientFactory = clientFactory;
     }
 
-    @Override
-    public PinpointClient get() {
-        PinpointClientFactory pinpointClientFactory = clientFactory.get();
-        PinpointClient pinpointClient = ClientFactoryUtils.createPinpointClient(profilerConfig.getCollectorTcpServerIp(), profilerConfig.getCollectorTcpServerPort(), pinpointClientFactory);
-        return pinpointClient;
+    public PinpointClientFactory get() {
+        int workerCount = 0;
+
+        if ("TCP".equalsIgnoreCase(profilerConfig.getSpanDataSenderTransportType())) {
+            workerCount++;
+        }
+        if ("TCP".equalsIgnoreCase(profilerConfig.getStatDataSenderTransportType())) {
+            workerCount++;
+        }
+
+        if (workerCount == 0) {
+            return null;
+        } else {
+            PinpointClientFactory pinpointClientFactory = new DefaultPinpointClientFactory(1, workerCount);
+            pinpointClientFactory.setTimeoutMillis(1000 * 5);
+            return pinpointClientFactory;
+        }
     }
+
 }

@@ -96,7 +96,7 @@ public class DefaultProfilerConfig implements ProfilerConfig {
     private boolean instrumentMatcherEnable = true;
     private InstrumentMatcherCacheConfig instrumentMatcherCacheConfig = new InstrumentMatcherCacheConfig();
 
-    private int interceptorRegistrySize = 1024*8;
+    private int interceptorRegistrySize = 1024 * 8;
 
     private String collectorSpanServerIp = DEFAULT_IP;
     private int collectorSpanServerPort = 9996;
@@ -111,12 +111,14 @@ public class DefaultProfilerConfig implements ProfilerConfig {
     private int spanDataSenderSocketSendBufferSize = 1024 * 64 * 16;
     private int spanDataSenderSocketTimeout = 1000 * 3;
     private int spanDataSenderChunkSize = 1024 * 16;
+    private String spanDataSenderTransportType = "UDP";
     private String spanDataSenderSocketType = "OIO";
 
     private int statDataSenderWriteQueueSize = 1024 * 5;
     private int statDataSenderSocketSendBufferSize = 1024 * 64 * 16;
     private int statDataSenderSocketTimeout = 1000 * 3;
     private int statDataSenderChunkSize = 1024 * 16;
+    private String statDataSenderTransportType = "UDP";
     private String statDataSenderSocketType = "OIO";
 
     private boolean tcpDataSenderCommandAcceptEnable = false;
@@ -165,8 +167,6 @@ public class DefaultProfilerConfig implements ProfilerConfig {
     private boolean supportLambdaExpressions = true;
 
     private boolean proxyHttpHeaderEnable = true;
-    private List<String> proxyHttpHeaderNames = Collections.emptyList();
-    private boolean proxyHttpHeaderHidden = true;
 
     public DefaultProfilerConfig() {
         this.properties = new Properties();
@@ -233,6 +233,11 @@ public class DefaultProfilerConfig implements ProfilerConfig {
     @Override
     public String getStatDataSenderSocketType() {
         return statDataSenderSocketType;
+    }
+
+    @Override
+    public String getStatDataSenderTransportType() {
+        return statDataSenderTransportType;
     }
 
     @Override
@@ -303,6 +308,11 @@ public class DefaultProfilerConfig implements ProfilerConfig {
     @Override
     public String getSpanDataSenderSocketType() {
         return spanDataSenderSocketType;
+    }
+
+    @Override
+    public String getSpanDataSenderTransportType() {
+        return spanDataSenderTransportType;
     }
 
     @Override
@@ -386,12 +396,12 @@ public class DefaultProfilerConfig implements ProfilerConfig {
     public Filter<String> getProfilableClassFilter() {
         return profilableClassFilter;
     }
-    
+
     @Override
     public List<String> getApplicationTypeDetectOrder() {
         return applicationTypeDetectOrder;
     }
-    
+
     @Override
     public List<String> getDisabledPlugins() {
         return disabledPlugins;
@@ -414,7 +424,7 @@ public class DefaultProfilerConfig implements ProfilerConfig {
     public void setCallStackMaxDepth(int callStackMaxDepth) {
         this.callStackMaxDepth = callStackMaxDepth;
     }
-    
+
     @Override
     public boolean isPropagateInterceptorException() {
         return propagateInterceptorException;
@@ -441,18 +451,8 @@ public class DefaultProfilerConfig implements ProfilerConfig {
     }
 
     @Override
-    public List<String> getProxyHttpHeaderNames() {
-        return proxyHttpHeaderNames;
-    }
-
-    @Override
     public boolean isProxyHttpHeaderEnable() {
         return proxyHttpHeaderEnable;
-    }
-
-    @Override
-    public boolean isProxyHttpHeaderHidden() {
-        return proxyHttpHeaderHidden;
     }
 
     // for test
@@ -471,7 +471,7 @@ public class DefaultProfilerConfig implements ProfilerConfig {
         this.instrumentMatcherCacheConfig.setSuperCacheSize(readInt("profiler.instrument.matcher.super.cache.size", 4));
         this.instrumentMatcherCacheConfig.setSuperCacheEntrySize(readInt("profiler.instrument.matcher.super.cache.entry.size", 4));
 
-        this.interceptorRegistrySize = readInt("profiler.interceptorregistry.size", 1024*8);
+        this.interceptorRegistrySize = readInt("profiler.interceptorregistry.size", 1024 * 8);
 
         this.collectorSpanServerIp = readString("profiler.collector.span.ip", DEFAULT_IP, placeHolderResolver);
         this.collectorSpanServerPort = readInt("profiler.collector.span.port", 9996);
@@ -487,12 +487,14 @@ public class DefaultProfilerConfig implements ProfilerConfig {
         this.spanDataSenderSocketTimeout = readInt("profiler.spandatasender.socket.timeout", 1000 * 3);
         this.spanDataSenderChunkSize = readInt("profiler.spandatasender.chunk.size", 1024 * 16);
         this.spanDataSenderSocketType = readString("profiler.spandatasender.socket.type", "OIO");
+        this.spanDataSenderTransportType = readString("profiler.spandatasender.transport.type", "UDP");
 
         this.statDataSenderWriteQueueSize = readInt("profiler.statdatasender.write.queue.size", 1024 * 5);
         this.statDataSenderSocketSendBufferSize = readInt("profiler.statdatasender.socket.sendbuffersize", 1024 * 64 * 16);
         this.statDataSenderSocketTimeout = readInt("profiler.statdatasender.socket.timeout", 1000 * 3);
         this.statDataSenderChunkSize = readInt("profiler.statdatasender.chunk.size", 1024 * 16);
         this.statDataSenderSocketType = readString("profiler.statdatasender.socket.type", "OIO");
+        this.statDataSenderTransportType = readString("profiler.statdatasender.transport.type", "UDP");
 
         this.tcpDataSenderCommandAcceptEnable = readBoolean("profiler.tcpdatasender.command.accept.enable", false);
         this.tcpDataSenderCommandActiveThreadEnable = readBoolean("profiler.tcpdatasender.command.activethread.enable", false);
@@ -513,7 +515,7 @@ public class DefaultProfilerConfig implements ProfilerConfig {
         if (this.callStackMaxDepth < 2) {
             this.callStackMaxDepth = 2;
         }
-        
+
         // JDBC
         this.jdbcSqlCacheSize = readInt("profiler.jdbc.sqlcachesize", 1024);
         this.traceSqlBindValue = readBoolean("profiler.jdbc.tracesqlbindvalue", false);
@@ -541,9 +543,9 @@ public class DefaultProfilerConfig implements ProfilerConfig {
 
         // application type detector order
         this.applicationTypeDetectOrder = readList("profiler.type.detect.order");
-        
+
         this.disabledPlugins = readList("profiler.plugin.disable");
-        
+
         // TODO have to remove        
         // profile package included in order to test "call stack view".
         // this config must not be used in service environment because the size of  profiling information will get heavy.
@@ -552,14 +554,12 @@ public class DefaultProfilerConfig implements ProfilerConfig {
         if (!profilableClass.isEmpty()) {
             this.profilableClassFilter = new ProfilableClassFilter(profilableClass);
         }
-        
+
         this.propagateInterceptorException = readBoolean("profiler.interceptor.exception.propagate", false);
         this.supportLambdaExpressions = readBoolean("profiler.lambda.expressions.support", true);
 
         // proxy http header names
         this.proxyHttpHeaderEnable = readBoolean("profiler.proxy.http.header.enable", true);
-        this.proxyHttpHeaderNames = readList("profiler.proxy.http.header.names");
-        this.proxyHttpHeaderHidden = readBoolean("profiler.proxy.http.header.hidden", true);
 
         logger.info("configuration loaded successfully.");
     }
@@ -669,10 +669,10 @@ public class DefaultProfilerConfig implements ProfilerConfig {
         return result;
     }
 
+
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder(1024);
-        sb.append("{");
+        final StringBuilder sb = new StringBuilder("DefaultProfilerConfig{");
         sb.append("properties=").append(properties);
         sb.append(", propertyPlaceholderHelper=").append(propertyPlaceholderHelper);
         sb.append(", profileEnable=").append(profileEnable);
@@ -690,11 +690,13 @@ public class DefaultProfilerConfig implements ProfilerConfig {
         sb.append(", spanDataSenderSocketSendBufferSize=").append(spanDataSenderSocketSendBufferSize);
         sb.append(", spanDataSenderSocketTimeout=").append(spanDataSenderSocketTimeout);
         sb.append(", spanDataSenderChunkSize=").append(spanDataSenderChunkSize);
+        sb.append(", spanDataSenderTransportType='").append(spanDataSenderTransportType).append('\'');
         sb.append(", spanDataSenderSocketType='").append(spanDataSenderSocketType).append('\'');
         sb.append(", statDataSenderWriteQueueSize=").append(statDataSenderWriteQueueSize);
         sb.append(", statDataSenderSocketSendBufferSize=").append(statDataSenderSocketSendBufferSize);
         sb.append(", statDataSenderSocketTimeout=").append(statDataSenderSocketTimeout);
         sb.append(", statDataSenderChunkSize=").append(statDataSenderChunkSize);
+        sb.append(", statDataSenderTransportType='").append(statDataSenderTransportType).append('\'');
         sb.append(", statDataSenderSocketType='").append(statDataSenderSocketType).append('\'');
         sb.append(", tcpDataSenderCommandAcceptEnable=").append(tcpDataSenderCommandAcceptEnable);
         sb.append(", tcpDataSenderCommandActiveThreadEnable=").append(tcpDataSenderCommandActiveThreadEnable);
@@ -726,6 +728,7 @@ public class DefaultProfilerConfig implements ProfilerConfig {
         sb.append(", disabledPlugins=").append(disabledPlugins);
         sb.append(", propagateInterceptorException=").append(propagateInterceptorException);
         sb.append(", supportLambdaExpressions=").append(supportLambdaExpressions);
+        sb.append(", proxyHttpHeaderEnable=").append(proxyHttpHeaderEnable);
         sb.append('}');
         return sb.toString();
     }
